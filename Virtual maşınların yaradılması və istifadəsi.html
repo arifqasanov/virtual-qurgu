@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Virtual maşınların yaradılması və istifadəsi</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+:root{--bg:#efeadf;--ink:#101010;--bl:#2438ff;--li:#d7ff3a;--mu:#6b675d;--ln:#c9c3b4;color-scheme:light;box-sizing:border-box}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,"Segoe UI",Arial,sans-serif}
+.mono,.tag,th,.btn{font-family:"IBM Plex Mono",ui-monospace,Consolas,monospace}
+#wm{position:fixed;right:2vw;bottom:2vh;font-size:min(26vw,48vh);font-weight:800;letter-spacing:-.06em;line-height:.8;color:transparent;-webkit-text-stroke:2px rgba(16,16,16,.14);z-index:0;pointer-events:none}
+.stage{position:fixed;right:0;top:0;width:46vw;height:100%;z-index:1;perspective:1500px;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.stage div{transform-style:preserve-3d}
+.L{position:absolute;left:50%;top:50%;width:280px;height:280px;margin:-140px 0 0 -140px;border:2px solid var(--ink);font:500 12px "IBM Plex Mono",monospace;letter-spacing:.1em;padding:10px;display:flex;align-items:flex-end}
+.hw{background:#d9d3c4;background-image:linear-gradient(var(--ln) 1px,transparent 1px),linear-gradient(90deg,var(--ln) 1px,transparent 1px);background-size:28px 28px}
+.os{background:#fff;width:250px;height:250px;margin:-125px 0 0 -125px}
+.hv{background:var(--li)}
+.vml{background:rgba(255,255,255,.35);border-style:dashed}
+.vm{position:absolute;width:118px;height:118px;background:var(--bl);color:#fff;border:2px solid var(--ink);display:flex;align-items:flex-end;padding:8px;font:500 11px "IBM Plex Mono",monospace;box-shadow:inset 0 0 0 4px rgba(255,255,255,.18)}
+.v1{left:10px;top:10px}.v2{left:150px;top:10px}.v3{left:10px;top:150px}.v4{left:150px;top:150px}
+.slide{position:absolute;inset:0;z-index:2;padding:calc(8vh + env(safe-area-inset-top,0px)) 47vw calc(10vh + env(safe-area-inset-bottom,0px)) 5vw;display:flex;flex-direction:column;justify-content:center;gap:clamp(10px,1.8vh,20px);visibility:hidden;overflow-y:auto;scrollbar-width:none}
+.tag{font-size:11px;letter-spacing:.16em;text-transform:uppercase;display:flex;align-items:center;gap:8px}.tag:before{content:"";width:10px;height:10px;background:var(--bl)}
+h1{font-size:clamp(36px,6.4vw,104px);line-height:.92;font-weight:800;letter-spacing:-.055em}
+h2{font-size:clamp(28px,4.2vw,64px);line-height:.98;font-weight:800;letter-spacing:-.05em}
+u{text-decoration:underline;text-decoration-color:var(--li);text-decoration-thickness:.14em;text-underline-offset:-.02em;text-decoration-skip-ink:none}
+.bl{color:var(--bl)}
+.ln{display:block;overflow:hidden;padding-bottom:.1em;margin-bottom:-.1em}.ln>i{display:block;font-style:normal}
+p,li,td{font-size:clamp(12px,1.08vw,15.5px);line-height:1.5}
+.mu{color:var(--mu)}
+table{width:100%;border-collapse:collapse;border-top:2px solid var(--ink)}
+th{font-size:10.5px;font-weight:400;letter-spacing:.12em;text-transform:uppercase;color:var(--mu);text-align:left;padding:7px 8px 7px 0}
+td{padding:7px 8px 7px 0;border-top:1px solid var(--ln);vertical-align:top}td:first-child{font-weight:800}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:clamp(12px,2vw,28px)}.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(10px,1.6vw,22px)}
+.tl{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px 18px}.tl b{display:block;font:500 11px "IBM Plex Mono",monospace;color:var(--bl);margin-bottom:2px}.tl p{font-size:clamp(11px,.98vw,14px);line-height:1.4}
+.ul{list-style:none}.ul li{padding:6px 0 6px 20px;border-top:1px solid var(--ln);position:relative}.ul li:before{content:"+";position:absolute;left:0;font:500 13px "IBM Plex Mono",monospace;color:var(--bl);top:6px}
+.ul.m li:before{content:"–";color:#e0245e}
+.st{list-style:none;counter-reset:s}.st li{counter-increment:s;padding:6px 0 6px 34px;border-top:1px solid var(--ln);position:relative}
+.st li:before{content:counter(s,decimal-leading-zero);position:absolute;left:0;top:7px;font:500 12px "IBM Plex Mono",monospace;color:var(--bl)}
+.btn{background:var(--ink);color:#fff;border:0;padding:8px 14px;font-size:12px;cursor:pointer;border-radius:99px;letter-spacing:.05em}.btn:hover{background:var(--bl)}.btn.off{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink)}
+.bar{height:8px;border:1.5px solid var(--ink);margin:5px 0 10px}.bar i{display:block;height:100%;background:var(--bl);width:0}
+.big{font-size:clamp(44px,6vw,92px);font-weight:800;letter-spacing:-.06em;line-height:1;color:var(--bl)}
+.strip{display:grid;grid-template-columns:1fr 1fr;border:1.5px solid var(--ink)}.strip div{padding:10px 14px}.strip div+div{border-left:1.5px solid var(--ink)}
+.fld{display:grid;grid-template-columns:44px 1fr 48px;gap:8px;align-items:center;font-size:12.5px;margin-bottom:5px}.fld input{width:100%;accent-color:var(--bl)}.fld input[type=text]{grid-column:2/4;border:1.5px solid var(--ink);background:#fff;padding:3px 6px;font:12.5px Inter}
+.card{border:1.5px solid var(--ink);padding:12px;background:rgba(255,255,255,.5)}
+.con{background:var(--ink);color:var(--li);font:400 clamp(10px,.92vw,12.5px)/1.65 "IBM Plex Mono",monospace;padding:12px;border-radius:10px;min-height:10em;white-space:pre-wrap;word-break:break-all}
+.cl:before{content:"$ ";color:#fff}.cur:after{content:"▍";animation:bl 1s steps(1) infinite}@keyframes bl{50%{opacity:0}}
+.chips span{display:inline-block;border:1.5px solid var(--ink);border-radius:99px;padding:3px 11px;margin:0 5px 5px 0;font:500 11.5px "IBM Plex Mono",monospace}
+.mq{overflow:hidden;white-space:nowrap;border-top:2px solid var(--ink);border-bottom:2px solid var(--ink);padding:8px 0}.mq div{display:inline-block;animation:mq 26s linear infinite;font:500 clamp(13px,1.4vw,19px) "IBM Plex Mono",monospace}@keyframes mq{to{transform:translateX(-50%)}}
+.mq b{color:var(--bl);margin:0 .9em}.y{color:var(--bl);font-weight:800}.n{color:#aaa}
+#ui{position:fixed;left:0;right:0;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:20;display:flex;justify-content:space-between;align-items:center;padding:0 5vw;gap:14px}
+#pl{flex:1;max-width:36vw;height:2px;background:var(--ln)}#pl i{display:block;height:100%;width:0;background:var(--ink)}
+#cn{font:500 12px "IBM Plex Mono",monospace;letter-spacing:.14em}
+.nv{display:flex;gap:6px;align-items:center}.nv .btn{width:38px;height:38px;padding:0;border-radius:50%;font-size:15px}
+#top{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));left:5vw;z-index:20;font:500 11px "IBM Plex Mono",monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--mu)}
+@media(max-width:900px){.stage{width:100%;height:32vh;top:calc(28px + env(safe-area-inset-top,0px))}.slide{padding:calc(33vh + 30px) 5vw 80px;justify-content:flex-start}.g2,.g3,.tl,.strip{grid-template-columns:1fr}.strip div+div{border-left:0;border-top:1.5px solid var(--ink)}#wm{display:none}#pl{max-width:30vw}}
+@media(prefers-reduced-motion:reduce){.mq div{animation:none}}
+</style>
+</head>
+<body>
+<div id="wm">01</div>
+<div id="top">Virtual maşınlar · Arif Həsənov · 6526a1</div>
+
+<div class="stage"><div id="tilt"><div id="sw"><div id="ix"><div id="iz">
+  <div class="L hw">HARDWARE</div>
+  <div class="L os" id="Los">HOST OS</div>
+  <div class="L hv" id="Lhv">HYPERVISOR</div>
+  <div class="L vml" id="Lvm"><div class="vm v1">VM 1</div><div class="vm v2">VM 2</div><div class="vm v3">VM 3</div><div class="vm v4">VM 4</div></div>
+</div></div></div></div></div>
+
+<section class="slide">
+  <div class="tag">Virtuallaşdırma texnologiyaları</div>
+  <h1><span class="ln"><i>Virtual</i></span><span class="ln"><i>maşınların</i></span><span class="ln"><i class="bl">yaradılması</i></span><span class="ln"><i>və istifadəsi</i></span></h1>
+  <div class="g3" data-a><div><div class="tag mu">Hazırladı</div><b>Arif Həsənov</b></div><div><div class="tag mu">Qrup</div><b>6526a1</b></div><div><div class="tag mu">Müəllim</div><b>Kamran Əbilov</b></div></div>
+  <p class="mu" data-a>Plan: anlayış · hypervisor · üstünlüklər · yaradılma · istifadə</p>
+  <div class="mq" data-a><div>VirtualBox<b>◆</b>VMware<b>◆</b>Hyper-V<b>◆</b>KVM<b>◆</b>Xen<b>◆</b>Proxmox<b>◆</b>QEMU<b>◆</b>VirtualBox<b>◆</b>VMware<b>◆</b>Hyper-V<b>◆</b>KVM<b>◆</b>Xen<b>◆</b>Proxmox<b>◆</b>QEMU<b>◆</b></div></div>
+</section>
+
+<section class="slide">
+  <div class="tag">01 · Anlayış və tarixçə</div>
+  <h2><span class="ln"><i>Virtual maşın <u>nədir?</u></i></span></h2>
+  <p data-a>Virtual maşın (VM) fiziki kompüterin CPU, RAM, disk və şəbəkə resurslarından istifadə edən, proqram səviyyəsində yaradılmış tam kompüterdir. Öz əməliyyat sistemi, disk faylı və şəbəkə kartı olur. Sağdakı şəkildə qatlar ayrılıb göstərilir.</p>
+  <table><tr><th>Termin</th><th>Mənası</th></tr>
+    <tr data-a><td>Host</td><td>VM-ləri işlədən fiziki kompüter</td></tr>
+    <tr data-a><td>Guest</td><td>VM daxilində işləyən qonaq OS</td></tr>
+    <tr data-a><td>Hypervisor</td><td>Resursları VM-lər arasında bölən qat</td></tr>
+    <tr data-a><td>Disk obrazı</td><td>VM-in diski bir fayl kimi: .vdi, .vmdk, .vhdx, .qcow2</td></tr>
+    <tr data-a><td>Snapshot</td><td>VM-in müəyyən andakı vəziyyətinin surəti</td></tr></table>
+  <div class="tl" data-a>
+    <div><b>1960-cı illər</b><p>IBM CP/CMS: mainframe-də ilk virtuallaşdırma</p></div>
+    <div><b>1999</b><p>VMware Workstation: x86 üçün ilk geniş məhsul</p></div>
+    <div><b>2001–2003</b><p>VMware ESX; açıq mənbəli Xen</p></div>
+    <div><b>2007</b><p>KVM Linux nüvəsində; VirtualBox buraxıldı</p></div>
+    <div><b>2008</b><p>Microsoft Hyper-V</p></div>
+    <div><b>2013 – bu gün</b><p>Docker, konteynerlər, bulud</p></div></div>
+</section>
+
+<section class="slide">
+  <div class="tag">02 · Hypervisor və arxitektura</div>
+  <h2><span class="ln"><i>İki tip, <u>bir məqsəd</u></i></span></h2>
+  <div data-a style="display:flex;gap:8px"><button class="btn" id="t1">Tip 1 · bare-metal</button><button class="btn off" id="t2">Tip 2 · hosted</button></div>
+  <p id="tdesc" data-a>Tip 1 hypervisor avadanlığın üzərində birbaşa işləyir: yüksək performans, serverlər üçün. Düyməyə basıb sağdakı şəkildə fərqə baxın.</p>
+  <table><tr><th>Proqram</th><th>Tip</th><th>Qeyd</th></tr>
+    <tr data-a><td>VMware ESXi</td><td>1</td><td>Kommersiya, data mərkəzlərdə geniş yayılıb</td></tr>
+    <tr data-a><td>Hyper-V</td><td>1</td><td>Windows-a daxildir (Pro / Enterprise / Server)</td></tr>
+    <tr data-a><td>KVM</td><td>1</td><td>Linux nüvə modulu, açıq mənbə</td></tr>
+    <tr data-a><td>Proxmox VE</td><td>1</td><td>KVM əsaslı açıq idarəetmə platforması</td></tr>
+    <tr data-a><td>VirtualBox</td><td>2</td><td>Pulsuz, Windows / Linux / macOS</td></tr>
+    <tr data-a><td>VMware Workstation</td><td>2</td><td>Güclü masaüstü həlli</td></tr></table>
+</section>
+
+<section class="slide">
+  <div class="tag">03 · Üstünlüklər və məhdudiyyətlər</div>
+  <h2><span class="ln"><i>Nə qazanırıq, <u>nə itiririk?</u></i></span></h2>
+  <div class="g2" data-a><div><p class="mu">Server resurslarından istifadə (təxmini)</p>
+    <p>Əvvəl <b>~15%</b></p><div class="bar"><i data-w="15%"></i></div><p>Sonra <b>~70–80%</b></p><div class="bar"><i data-w="78%"></i></div></div>
+    <div><div class="big" data-count="10">0</div><p>və daha çox VM bir fiziki serverdə. Sağda VM-lərin sayı artır.</p></div></div>
+  <div class="g2"><ul class="ul"><li data-a>Aparat, enerji və yer qənaəti</li><li data-a>VM-lər bir-birindən izolyasiya olunub</li><li data-a>Snapshot ilə bir kliklə geri qayıtmaq</li><li data-a>Klonlama və köçürmə</li><li data-a>Fəlakətdən bərpa sadələşir</li></ul>
+    <ul class="ul m"><li data-a>Hypervisor səbəbilə kiçik performans itkisi</li><li data-a>Host RAM və CPU VM-lər arasında bölünür</li><li data-a>GPU və xüsusi cihazlara çıxış məhduddur</li><li data-a>Host dayansa, bütün VM-lər dayanır</li><li data-a>Disk obrazları çox yer tutur</li></ul></div>
+  <div class="strip" data-a><div><b>Virtual maşın</b><p>Öz OS nüvəsi, onlarla GB, dəqiqələrlə start, güclü izolyasiya.</p></div><div><b>Konteyner (Docker)</b><p>Host nüvəsini paylaşır, MB ölçü, saniyələrlə start, yüngül izolyasiya.</p></div></div>
+</section>
+
+<section class="slide">
+  <div class="tag">04 · Yaradılma addımları</div>
+  <h2><span class="ln"><i>VM yaratmaq: <u>6 addım</u></i></span></h2>
+  <ol class="st g2" style="gap:0 24px">
+    <li data-a><b>Yoxla.</b> BIOS / UEFI-də VT-x və ya AMD-V aktiv olsun.</li><li data-a><b>ISO.</b> OS-in rəsmi ISO obrazını yüklə.</li>
+    <li data-a><b>VM yarat.</b> Ad, OS növü, RAM və CPU seç.</li><li data-a><b>Disk.</b> Virtual disk yarat (dinamik ölçü).</li>
+    <li data-a><b>Quraş.</b> ISO-nu qoşub OS-i quraşdır.</li><li data-a><b>Tools.</b> Guest Additions, snapshot.</li></ol>
+  <div class="g2">
+    <div class="card" data-a><div class="tag" style="margin-bottom:8px">Sihirbaz · RAM VM 1-in ölçüsünü dəyişir</div>
+      <div class="fld"><span>Ad</span><input type="text" id="vn" value="Ubuntu-Lab"></div>
+      <div class="fld"><span>RAM</span><input type="range" id="r" min="1" max="12" value="4"><output id="ro">4 GB</output></div>
+      <div class="fld"><span>CPU</span><input type="range" id="c" min="1" max="6" value="2"><output id="co">2</output></div>
+      <div class="fld"><span>Disk</span><input type="range" id="d" min="10" max="100" step="5" value="25"><output id="do">25 GB</output></div>
+      <p>Host RAM (16 GB)</p><div class="bar"><i id="hr"></i></div><p>Host CPU (8 nüvə)</p><div class="bar"><i id="hc"></i></div>
+      <p id="wr" class="mono" style="font-size:11.5px;min-height:1.5em"></p>
+      <div style="display:flex;gap:10px;align-items:center"><button class="btn" id="go">Başlat ▶</button><span id="st" class="mono" style="font-size:11.5px"></span></div></div>
+    <div class="con" data-a><span class="cl" data-t='VBoxManage createvm --name Lab --ostype Ubuntu_64 --register'></span>
+<span class="cl" data-t="VBoxManage modifyvm Lab --memory 4096 --cpus 2"></span>
+<span class="cl" data-t="VBoxManage createmedium disk --filename Lab.vdi --size 25600"></span>
+<span class="cl" data-t="VBoxManage storagectl Lab --name SATA --add sata"></span>
+<span class="cl" data-t="VBoxManage startvm Lab"></span></div></div>
+</section>
+
+<section class="slide">
+  <div class="tag">05 · İstifadə və şəbəkə rejimləri</div>
+  <h2><span class="ln"><i>Praktikada <u>istifadə</u></i></span></h2>
+  <ol class="st">
+    <li data-a><b>Bulud.</b> AWS EC2, Azure VM, Google Compute Engine VM-lər üzərində qurulub.</li>
+    <li data-a><b>Test.</b> Proqramı fərqli OS-lərdə sistemə zərər vermədən sına.</li>
+    <li data-a><b>Təhlükəsizlik.</b> Şübhəli faylı sandbox-da analiz et, pentest laboratoriyası.</li>
+    <li data-a><b>Təhsil.</b> Linux, şəbəkə və server təcrübəsi üçün risksiz mühit.</li>
+    <li data-a><b>Köhnə sistemlər.</b> Köhnə OS tələb edən tətbiqləri işlət.</li></ol>
+  <div class="chips" data-a><span>Snapshot</span><span>Clone</span><span>Export .ova</span><span>Shared folders</span><span>Clipboard</span></div>
+  <table><tr><th>Şəbəkə rejimi</th><th>İnternet</th><th>Host</th><th>VM↔VM</th><th>Xaricdən</th></tr>
+    <tr data-a><td>NAT</td><td class="y">✔</td><td class="n">–</td><td class="n">–</td><td class="n">–</td></tr>
+    <tr data-a><td>Bridged</td><td class="y">✔</td><td class="y">✔</td><td class="y">✔</td><td class="y">✔</td></tr>
+    <tr data-a><td>Host-only</td><td class="n">–</td><td class="y">✔</td><td class="y">✔</td><td class="n">–</td></tr>
+    <tr data-a><td>Internal</td><td class="n">–</td><td class="n">–</td><td class="y">✔</td><td class="n">–</td></tr></table>
+  <p class="mu" data-a>NAT-da xaricdən giriş yalnız port yönləndirməsi ilə olur. Tövsiyə: VM-ə host RAM-ının yarısından çoxunu ayırma, diski SSD-də saxla.</p>
+</section>
+
+<section class="slide">
+  <div class="tag">Nəticə</div>
+  <h1 style="font-size:clamp(34px,5.4vw,86px)"><span class="ln"><i>Bir cihaz,</i></span><span class="ln"><i class="bl">çox mühit.</i></span></h1>
+  <ol class="st"><li data-a>VM fiziki resursları bölüşdürərək izolyasiya olunmuş kompüterlər yaradır.</li><li data-a>Tip 1 serverlər, Tip 2 test və təhsil üçün daha münasibdir.</li><li data-a>Snapshot, klonlama və şəbəkə rejimləri işi təhlükəsiz və çevik edir.</li></ol>
+  <div class="g2" data-a><div><div class="tag mu">Hazırladı</div><b>Arif Həsənov · 6526a1</b><div class="tag mu" style="margin-top:8px">Müəllim</div><b>Kamran Əbilov</b></div>
+    <div><div class="tag mu">Mənbələr</div><p class="mono" style="font-size:12px">virtualbox.org<br>vmware.com<br>learn.microsoft.com<br>linux-kvm.org</p></div></div>
+  <p class="y" data-a style="font-size:clamp(16px,1.8vw,26px)">Diqqətinizə görə təşəkkür edirəm!</p>
+</section>
+
+<div id="ui"><div id="pl"><i></i></div><span id="cn">01 / 07</span><div class="nv"><button class="btn" id="p" aria-label="Əvvəlki">↑</button><button class="btn" id="x" aria-label="Növbəti">↓</button><button class="btn" id="f" aria-label="Tam ekran">⛶</button></div></div>
+
+<script>
+(function(){
+var S=[].slice.call(document.querySelectorAll('.slide')),t=S.length,i=0,busy=false,typers=[],wz=1,$=function(id){return document.getElementById(id)};
+var K=innerWidth<900?.55:1;
+var ST=[{g:8,os:0,vm:2},{g:62,os:1,vm:2},{g:58,os:0,vm:2},{g:42,os:0,vm:4},{g:50,os:0,vm:3},{g:46,os:0,vm:4},{g:8,os:0,vm:2}];
+gsap.set('#ix',{rotationX:58,scale:K});gsap.set('#iz',{rotationZ:-40});
+gsap.to('#sw',{rotationZ:7,duration:5,yoyo:true,repeat:-1,ease:'sine.inOut'});
+function apply(s,fast){
+  var g=s.g,o=s.os,d=fast?0:1.1,e='power3.inOut';
+  gsap.to('#Los',{z:o?g:0,opacity:o?1:0,duration:d,ease:e});
+  gsap.to('#Lhv',{z:o?2*g:g,duration:d,ease:e});
+  gsap.to('#Lvm',{z:o?3*g:2*g,duration:d,ease:e});
+  [].forEach.call(document.querySelectorAll('.vm'),function(v,k){
+    var on=k<s.vm;gsap.to(v,{scale:on?(k===0&&i===4?wz:1):0,opacity:on?1:0,y:(s.vm<=2&&k<2)?70:0,duration:d*.8,ease:'back.out(1.6)',delay:on?.1*k:0});
+  });
+  gsap.to('#ix',{rotationX:i===3?52:58,scale:K*(i===0||i===6?1.12:1),duration:d,ease:e});
+}
+document.addEventListener('mousemove',function(e){gsap.to('#tilt',{rotationY:(e.clientX/innerWidth-.5)*10,rotationX:-(e.clientY/innerHeight-.5)*8,duration:1,ease:'power2.out'})});
+function type(el){
+  typers.forEach(function(x){x.kill()});typers=[];
+  var cls=el.querySelectorAll('.cl'),d=1;
+  cls.forEach(function(c){c.textContent='';c.classList.remove('cur')});
+  cls.forEach(function(c){var s=c.dataset.t,o={v:0},len=s.length;
+    typers.push(gsap.to(o,{v:len,duration:len*.022,ease:'none',delay:d,onStart:function(){cls.forEach(function(q){q.classList.remove('cur')});c.classList.add('cur')},onUpdate:function(){c.textContent=s.slice(0,Math.round(o.v))}}));d+=len*.022+.2});
+}
+function enter(el,dl){
+  gsap.fromTo(el.querySelectorAll('.ln>i'),{yPercent:110},{yPercent:0,duration:1,ease:'power4.out',stagger:.09,delay:dl});
+  gsap.fromTo(el.querySelectorAll('[data-a]'),{y:24,opacity:0},{y:0,opacity:1,duration:.7,ease:'power3.out',stagger:.06,delay:dl+.2});
+  el.querySelectorAll('[data-w]').forEach(function(f,k){gsap.fromTo(f,{width:0},{width:f.dataset.w,duration:1.4,ease:'power3.out',delay:dl+.5+k*.2})});
+  el.querySelectorAll('[data-count]').forEach(function(c){var o={v:0};gsap.to(o,{v:+c.dataset.count,duration:1.5,delay:dl+.5,ease:'power2.out',onUpdate:function(){c.textContent=Math.round(o.v)+'+'}})});
+  if(el.querySelector('.con'))type(el);
+}
+function ui(){
+  gsap.to('#pl i',{width:((i+1)/t*100)+'%',duration:.6});
+  $('cn').textContent=('0'+(i+1)).slice(-2)+' / 0'+t;
+  gsap.fromTo('#wm',{yPercent:30,opacity:0},{yPercent:0,opacity:1,duration:.8,ease:'power3.out'});$('wm').textContent=('0'+(i+1)).slice(-2);
+}
+function go(k){
+  if(busy||k<0||k>=t||k===i)return;busy=true;
+  var out=S[i],inn=S[k],dn=k>i;i=k;ui();apply(ST[i]);
+  gsap.to(out,{y:dn?-50:50,opacity:0,duration:.4,ease:'power2.in',onComplete:function(){
+    out.style.visibility='hidden';gsap.set(out,{y:0,opacity:1});
+    inn.style.visibility='visible';gsap.fromTo(inn,{opacity:0},{opacity:1,duration:.3});enter(inn,0);busy=false;
+  }});
+}
+$('x').onclick=function(){go(i+1)};$('p').onclick=function(){go(i-1)};
+$('f').onclick=function(){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen()};
+document.addEventListener('keydown',function(e){
+  if(['ArrowRight','ArrowDown',' ','PageDown'].indexOf(e.key)>-1){e.preventDefault();go(i+1)}
+  else if(['ArrowLeft','ArrowUp','PageUp'].indexOf(e.key)>-1){e.preventDefault();go(i-1)}
+  else if(e.key==='f'||e.key==='F'){$('f').click()}
+});
+var lw=0;document.addEventListener('wheel',function(e){if(e.target.closest&&e.target.closest('input'))return;var n=Date.now();if(n-lw<900||Math.abs(e.deltaY)<30)return;var s=S[i];if(s.scrollHeight>s.clientHeight+4&&((e.deltaY>0&&s.scrollTop+s.clientHeight<s.scrollHeight-4)||(e.deltaY<0&&s.scrollTop>0)))return;lw=n;go(e.deltaY>0?i+1:i-1)},{passive:true});
+var y0=null;document.addEventListener('touchstart',function(e){y0=e.touches[0].clientY},{passive:true});
+document.addEventListener('touchend',function(e){if(y0===null)return;var d=e.changedTouches[0].clientY-y0;if(Math.abs(d)>80)go(d<0?i+1:i-1);y0=null},{passive:true});
+/* Tip 1 / Tip 2 */
+function tip(o){ST[2].os=o;apply(ST[2]);$('t1').classList.toggle('off',!!o);$('t2').classList.toggle('off',!o);
+  $('tdesc').textContent=o?'Tip 2 hypervisor adi proqram kimi host əməliyyat sisteminin üzərində işləyir: sadə quraşdırma, test və təhsil üçün əlverişlidir, lakin bir əlavə qat var.':'Tip 1 hypervisor avadanlığın üzərində birbaşa işləyir: yüksək performans, serverlər üçün. Düyməyə basıb sağdakı şəkildə fərqə baxın.'}
+$('t1').onclick=function(){tip(0)};$('t2').onclick=function(){tip(1)};
+/* sihirbaz */
+function upd(){
+  var r=+$('r').value,c=+$('c').value,d=+$('d').value;
+  $('ro').textContent=r+' GB';$('co').textContent=c;$('do').textContent=d+' GB';
+  gsap.to('#hr',{width:(r/16*100)+'%',duration:.4});gsap.to('#hc',{width:(c/8*100)+'%',duration:.4});
+  $('wr').textContent=(r>8||c>4)?'Diqqət: host yavaşlaya bilər, daha az resurs ayır.':'Ayarlar normaldır.';
+  wz=.7+r/12*.5;if(i===4)gsap.to('.v1',{scale:wz,duration:.4});
+}
+['r','c','d'].forEach(function(id){$(id).oninput=upd});upd();
+$('go').onclick=function(){
+  var b=$('go'),L=['BIOS yoxlanır…','Nüvə yüklənir…','Xidmətlər…','Giriş ekranı hazırdır'];b.disabled=true;
+  L.forEach(function(s,k){gsap.delayedCall(k*.65,function(){$('st').textContent=s})});
+  gsap.fromTo('.v1',{backgroundColor:'#2438ff'},{backgroundColor:'#d7ff3a',color:'#101010',duration:.35,yoyo:true,repeat:7});
+  gsap.delayedCall(2.8,function(){$('st').textContent=$('vn').value+' işləyir · '+$('r').value+' GB · '+$('c').value+' CPU';b.disabled=false;gsap.set('.v1',{backgroundColor:'#d7ff3a',color:'#101010'})});
+};
+S[0].style.visibility='visible';apply(ST[0],true);ui();enter(S[0],.2);
+gsap.from('#ix',{rotationX:20,scale:K*.6,opacity:0,duration:1.6,ease:'power3.out'});
+})();
+</script>
+</body>
+</html>
